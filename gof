@@ -1,1 +1,402 @@
 
+
+Creational patterns involve object instantiation and all these patterns provide a way to decouple a client from
+the objects it needs to instantiate.
+
+==============1. Factory method pattern=====================
+- Recognizable by creational methods returning an implementation of an abstract/interface type.
+-Used in Java: java.util.Calendar.getInstance(), java.text.NumberFormat.getInstance(), java.nio.charset.Charset.forName().
+-We need to think of aspects which may vary in future and which stays same and seperate them.
+-Factory pattern gives us a way to encapsulate the instantiation of concrete types. 
+
+=============2. Abstract Factory pattern======================
+- Recognizable by creational methods returning the factory itself which inturn can be used to create abstract/inerface types.
+-Used in java: javax.xml.parser.DocumentBuilderFactory.newInstance(),javax.xml.transform.TransformerFactory.newInstance.
+-
+
+=============3. Prototype pattern:=============================
+-Recognizable by creational methods returning a difference instance of itself with same properties.
+-Used in java: java.lang.Object.clone 
+-Prototype means a template of any Object before the actual object is constructed. It is used when application needs different instances of a class which are 
+almost same in state or differs very little. 
+-e.g TestCase prototype = new TestCase(); prototype.buildFromXML(node).
+TestCase actualObject = new TestCase(prototype); actualObject.setParameters(newParameterMap);
+-It is used when creating an instance of a class is either complicated or expensive. 
+-Prototype pattern should be considered to use when a system must create new objects of many types in a complex class hierarchy.
+
+========4. Builder Design Pattern=============
+-Recognizable by creation methods returning the instance itself.
+-it aims to seperate the construction process of a complex object from its represnetation so that same construction process can create different represnetation.
+-Used in Java: java.lang.StringBuilder.append(),java.nio.ByteBuffer.put(),CharBuffer.put(),ShortBuffer.put() etc. 
+-Where we need: it helps us creating immutable objects with large set of state attributes. 
+-e.g User user = new User(); 
+UserBuilder builder = new UserBuilder(user);
+builder.name("A").surname("B").age(44).phone(444).address("abc").build();
+Class UserBuilder{
+	User user;
+	public UserBuilder(User user){this.user = user}
+	public UserBuilder name(String name){this.user.name= name; return this;}
+	public UserBuilder age(int age){this.user.age = age; return age;}
+	public User build(){return this.user}
+}
+By using the builder design pattern you provide a way to create the complex structure of an object 
+without mixing it with the steps for creating it.
+We use the builder pattern to encapsulate the construction of Product and allows to be constructed in steps.
+
+Builder uses and drawbacks:
+Often used for building composite structure.
+Constructing objects require more domain knowledge of client than when working with Factory pattern.
+
+Builder benefits:
+Allows objects to be constructed in a multistep and varrying processes (as opposed to one step in Factory pattern)
+Hides the internal represnetation of product from the client.
+
+=========================5. Singleton Pattern============================================
+-Recognizable by creational methods returning of itself per JVM.
+
+Notes:
+1. Cloneable interface is broken in java
+- 1. The first gap is that Clone method should have been in Cloneable interface. Even if your class implements Cloneable interface, you can still not make
+clone of it(By intentionally not overriding the clone method)
+- 2. Clone method does not call any constructor for creating a new instance. 
+- 3. Its classic example of spelling mistake. should be Clonable.
+- 4. There is no mechanism in java to deep copy.
+
+questions:
+core java, multithreading, design patterns, design principle, concurrency- deadlock, exception handling , 
+memory management, difference between java 7 and java 8 features… 
+ was asked about my previous jobs: duties an experience, projects I participated in etc.
+ Highest even number in an array of whole numbers with max 1 iteration. Sorting excercise. 
+ 
+===================================================================================================================
+Structural patterns let you compose classes or Objects into larger structures.
+
+========1. Adapter =================
+-Convert the interface of a class into another interface clients expect. Adapter lets classes work together that couldn’t 
+otherwise because of incompatible interfaces.
+-Usefull: Adapter pattern is useful for the System integration (Apache Camel e.g.) where some existing system components have 
+to be adapted by other system components without sourcecode modifications.
+-e.g. BufferedReader class has a constructor which expects Reader interface. BufferedReader(Reader reader)
+BufferedReader works on character stream. 
+. InputStream in = System.in; Here InputStream reads the data from console but in byte stream. 
+. So the problem is client is expecting Reader (Target interface) which reads character stream but the adaptee interface is different and also it reads
+data in bytes.
+. So here we have an adapter InputStreamReader(Adaptee+Target) which sits in between client and provider. 
+. InputStreamReader is = new InputStreamReader(System.in);
+. BufferedReader bf = new BufferedReader(isr)
+- Participants of Adapter pattern:
+. Client: which expects a target interface. BufferedReader
+. Target: Interface which Adater has to implement in order to satisfy client. Reader 
+. Adapter: Which satisfies the client by implementing the target interface and calls the adaptee to do main work. InputStreamReader
+. Adaptee: The incompatible interface which is adapted and has some main logic. InputStream.
+-How much work should adapter do: If the target and adaptee are similar than Adapter just have to delegate the work to adaptee. But if
+target and adaptee are not similar then the Adapter has to implement the operations of target interface which are not implemented by adaptee. 
+-One more example of Adapter interface can be EnumerationIterator
+
+================2. Bridge Pattern================
+Bridge pattern allows you to vary not only implementations but also your abstractions. 
+You achieve this by placing the implementations and abstractions in seperate class hierarchies. 
+
+In the bridge pattern, we separate an abstraction and its implementation and develop separate inheritance structures for both the abstraction and 
+the implementor. The abstraction is an interface or abstract class, and the implementor is likewise an interface or abstract class. The abstraction 
+contains a reference to the implementor. Children of the abstraction are referred to as refined abstractions, and children of the implementor are concrete
+implementors. Since we can change the reference to the implementor in the abstraction, we are able to change the abstraction's implementor at run-time. 
+
+e.g 1. Before bridge.
+Vehicle->Bike, Vehicle->Car
+Car->AssembledCar, Car->ProducedCar
+Bike -> AssembledBike, Car -> ProducedBike 
+-In future there are chances of various other Vehicles types can be invented (Truck,Jeep). Similarly other types of concrete implementation (e.g. Imported)
+can be incorporated. In such case the heirarchy of this combination will grow exponantialy and very complex to maintain. 
+
+After Bridge. 
+Abstract Class Vehicle{
+//has a reference to implementor interface
+private Workshop workshop;
+}
+
+class Assembled implements Workshop{}
+class Produced implements Workshop{}
+
+class Car extends Vehicle{}
+class Bike extends Vehicle{}
+-So now both abstration (Vehicle here) and implementation (Workshop) can be extended in future without affecting each other. 
+
+When there are inheritance hierarchies creating concrete implementation, you loose flexibility because of interdependence.
+Adapter pattern makes things work after they're designed; Bridge makes them work before they are.
+
+
+ 
+===============3. Composite Pattern================
+-The Composite pattern allows you to compose objects in tree structures. 
+Composite lets clients treat individual objects and compositions of objects uniformly.
+-java usage: java.awt.Container.add(Component)
+-Implementing a composite pattern: Component represents a base class or interface for primitive objects (leafs) and Composite represents a composite class (Node).
+for e.g. Component interface has draw() method. Drawing class represent a composite class(Node) and Line or Text classes represent primitive objects(Leaf).
+The Drawing class maintains a collection of Components. 
+public interfac Component{
+draw();
+addComponent();
+removeComponent();
+}
+
+public class Drawing{
+List<Component> components;
+public void addComponent(Component c){components.add(c)}
+public void draw(){
+for(Componet c: components){
+	c.draw();
+}
+}
+}
+
+class Line extends Component{
+public void draw(){s.o.p("Lining")}
+}
+
+-Client uses Component: the repaint method of Client class need not distinguish bw components and composites. 
+public class Client{
+	public void repaint(Component c){
+		c.draw();
+	}
+}
+-Java developers need the composite pattern because we often must manipulate the composites exactly the same way we manipulate 
+primitive objects.
+TODO: Need to study Streams from thinking in java book.
+
+=============4. Decorator pattern=========================
+-The Decorator pattern attaches additional responsibilities to an object dynamically. Decorator provides a flexible alternative to 
+subclassing for extending functionality. 
+-The decorators have the same supertype as the Object they wrap. But we should create one separate interface for Decorator which can 
+extend the decoratable interface.
+-The decorator adds its own behaviour either before or/and after the delegating to the object it decorates to do the rest of the job.
+-Objects can be decorated at any time, so we can decorate objects dynamically at runtime with as many decoraters as we like.
+- e.g. Espresso implements Beverage, CandimentDacorator extends Beverage, Milk implements CandimentDacorator.
+Beverage beverage = new Espresso();
+beverage = new Milk(beverage);
+beverage = new CoffePowder(beverage);
+s.o.p.(beverage.cost());
+-Java Usage: FileInputStream-reads bytes from file. BufferedInputStream-decorates FileInputStream and extends the functionality by 
+providing readLine() and bufferes input to improve performance. 
+LineNumberInputStream- decorates BufferedInputStream and adds extra functionality of counting line numbers as it reads. 
+
+============5. Facade pattern=============================
+-Facade pattern provides a unified interface to a set of interfaces in subsystem. Facade defines a higher level interface that
+makes the subsystem easier to use.
+-Facade pattern allow us to avoid the tight coupling bw clients and subsystem and helps us to adhere to object oriented principle of least knowledge.
+-e.g. public class HomeTheaterFacade{
+private Amplifier amplifier;private Tuner tuner;CDPlayer cdPlayer;Projector projector;
+public void watchMovie(){amplifier.on();projector.start();tuner.tune();cdPlayer.run();}
+}
+-Java usage: java.faces.context.FacesContext: it internally uses LifeCycle, ViewHandler, NavigationHandler and many more without the enduser has to worry about it.
+
+-Principle of least knowledge- talk to your imediate friends. This prevents us from building a design with large number of classes coupled together. This
+kind of fragile system is costly to maintain and complex for others to understand.
+-Without principle: public float getTemperature(){return station.getThermometer().getTemperature()}
+-With principle: public float getTemperature(){return station.getTemperature()}
+-We should invoke methods that belong to:
+1. The object itself
+2. Object passed in as parameter to method
+3. Any Object the method creates
+4. Any components of the object (Has A reference variables)
+
+=========6. Flyweight pattern========
+Use flyweigth pattern when once instance of a class can be used to provide many "virtual instances".
+Flyweight is used when a class has many instances and they all can be controlled identically.
+-Java Usages: java.lang.Integer.valueOf(int). It caches the instances for (-128 to +127) values. 
+Benefits.
+Reduces the no of instances at runtime, saving memory.
+
+==========7. Proxy pattern===============================
+-Proxy is "representative" for another object which may be remote, expensive to create or need security. 
+-usage java: java.lang.reflect.Proxy, java.rmi.* API.
+
+========================================================================================================================
+
+
+Behavioural pattern is a pattern which is concerned about how classes and objects interact and distribute the responsibility.
+
+=========1. Chain of Responsibility Pattern======
+We use chain of responsibility pattern when we want to give more than one object a chance to handle a request.
+SpamEmailHandler-> FanEmailHandler-> ComplaintEmailHandler-> NewLocEmailHandler
+-Java usage: javax.filter.Filter.doFilter()
+
+=========2. Command pattern======================
+-The Command pattern is used to decouple the requestor of an action from the object that actually performs that action.
+-usage java: All implementation of org.apache.struts.Action, java.lang.Runnable.
+public interface Command{
+publiic void execute();
+}
+public class LightOnCommand implements Command{
+public void execute(){s.o.p.("lights on");}
+}
+
+public class RemoteControl{
+private Command command;
+//gettter and .
+public void buttonPressed(){
+commande.execute();
+}
+}
+
+public class Test{
+p.s.v.main(String args[]){
+	LightOnCommand command = new LightOnCommand();
+	RemoteControl remote = new RemoteControl();remote.setCommand(command)
+	remote.buttonPressed();
+}
+}
+
+==========3. Interpreter pattern=============
+Use the interpreter pattern when you need to build an interpreter for a language.
+For e.g. suppose you have a simple grammer for which you need to represent and interpret sentences in grammer.
+Here interpreter pattern defines a class based representation for its grammer. 
+-java usage: java.util.Pattern, java.text.Format.
+
+===============4. Iterator Pattern================
+-The Iterator pattern provides a way to access the elements of an aggregate object sequentially without exposing its
+underlying representation.
+-For e.g Class User has List<Address> addresses. Instead of exposing Lis<Address> as part of getter we should expose the Iterator<Address>
+So that in future we can change the internal data structure from ArrayList to HashSet but our client need not to change. As we still be returning a iterator.
+
+==============5. Mediator Pattern ===================
+Use the Mediator pattern to centeralize the complex communications and control between related objects.
+-common use: Mediator is used to to coordinate the related GUI components. 
+-benefit: simplifies the maintenance of the system by centeralizing control logic.
+-java usage: java.util.concurrent.Executer.execute().
+
+======== 6. Memento pattern=============
+Memmeto pattern is used to save the state of an object so that it can be restored to its previous state.
+Here we keep the Object that saves the state of an Object seperate for Single responsibility principle. 
+That seperate object which holds the state of another object is called Memento object.
+
+=========7. Observer Pattern=========
+Observer pattern = Publisher+Subscribers. Observer pattern defines a one-to-many dependency between objects so that 
+when one object changes state, all of its dependency are notified and updated accordingly. 
+java usage: java.util.Observable/Observer. javax.servlet.context.ServletContextListner,SessionListener.
+
+===========8. State pattern=================
+State pattern allows an object to alter its behaviour when its internal state changes. 
+Here we encapsulate the state based behaviours and delegate behaviour to the current state. 
+public class GumballMachine{
+private State noQuarterState;
+private State hasQuarterState;
+private State soldState;
+private State soldOutState;
+private int count;
+
+private State = soldOutState;
+public GumballMachine(int gumballs)
+noQuarterState = new NoQuarterState(this);
+hasQuarterState = new HasQuarterState(this);
+soldState = new SoldState(this);
+soldOutState = new SoldOutState(this);
+if(gumballs > 0){
+	state = noQuarterState;
+}
+
+public void insertQuarter(){ state.insertQuarter();}
+public void ejectQuarter(){ state.ejectQuarter();}
+public void turnCrank(){ state.turnCrank(); state.dispanse();}
+
+public void releaseBall(){ if(count != 0) count--;}
+}
+
+public class NoQuarterState implements State{
+	private GumballMachine gumballMachine;
+	public NoQuarterState(GumballMachine gumballMachine){this.gumballMachine = gumballMachine}
+	
+	public void insertQuarter(){gumballMachine.setState(gumballMachine.getHasQuarterState());}
+	public void ejectQuarter(){S.O.P("Please insert quarter first");}
+	public void turnCrank(){ S.O.P(" No balls dispansed");}
+	public void dispanse(){S.o.p(" no ball dispansed");}
+	}
+
+public class HasQuarterState{
+//constructor and variable
+public void insertQuarter(){S.O.P("There is already a quarter inserted");}
+public void ejectQuarter(){S.O.P("Rolling back to no quarter"); gumballMachine.setState(gumballMachine.getNoQuarterState());}
+public void turnCrank(){gumballMachine.setState(gumballMachine.getSoldState());}
+public void dispanse(){S.o.p(" no ball dispansed");}
+}
+
+public class SoldState{
+//constructor and variable
+public void insertQuarter(){S.o.p("wait for the ball please..");}
+public void ejectQuarter(){S.o.p("No rollback possible, ball is on the way");}
+public void turnCrank(){S.o.p.("Wait please");}
+public void dispanse(){S.o.p("Here comes your ball..");  gumballMachine.releaseBall();gumballMachine.setState(gumballMachine.getNoQuarterState());}
+}
+
+========================9. Strategy Pattern====================
+Design Principle: Identify the aspect of your application that varies and separate them from what stays same.
+Take the parts that vary and encapsulate them so that later you can alter or extend the part that vary without affecting the part which does not.
+This is the key principle for all design patterns which provides a way to let some part of a system vary independently of all other parts.
+
+The Strategy pattern defines a family of algorithems, encapsulate each one and makes them interchangeable. Strategy lets the algorithem vary independently from
+the client that uses it.
+The strategy pattern is one way that composition can be used as an alternative to subclassing. Rather than providing different behaviors via subclasses overriding methods in superclasses, the strategy pattern allows different behaviors to be placed in Concrete Strategy classes which share the common Strategy interface
+For. set of different classes that implement an algorithem to compute the sales tax for different states.
+public class InvoiceHelper{
+private TaxCalculator taxCalculator;
+generateInvoice(){
+int sum = taxCalculator.tax()+bill;
+}
+}
+
+BostonTaxImpl implements TaxCalculator{
+public int tax(){
+return 50% of bill;
+}
+}
+
+======================10. Template Method pattern===============
+Template method is a method that defines an algorithm as a set of steps. One or more of these steps are abstract and
+defined by subclasses. This ensures the algorithem's structure stays unchanged.
+
+abstract class AbstractClass{
+final void templateMethod(){
+primitiveOperation1();
+primitiveOperation2();
+concreteOperation();
+hook();
+}
+abstract void primitiveOperation1();
+abstract void primitiveOperation2();
+final void concreteOperation(){
+}
+void hook(){}
+}
+
+With prinicple "Dont call us,we will call you" we allow low level components to hook themselves into a system.
+High level components determine when low level components are needed and how.
+
+-Java usage: java.io has a read() method which must be implemented by all subclasses (FileInputStream) and is used by
+template method read(byte[],int offset,int length).
+java.servlet.http.HttpServlet has doXXX() methods which you can override to hook your logic in the algorithm.
+
+=================11. Visitor pattern===============
+Use the visitor pattern when you want to add capabilities to a composite of objects and ecapsulation is not 
+important.
+The visitor must visit each element of the composite. This is done by a client who behaves as Traversor object. 
+The visitor is guided by the traversor to gather state from all of the objects in the composite. Once state has 
+been gathered , the client can have the visitor perform various operations on the state. When new functianality is 
+required only the visitor must be changed.
+
+- java usage: java.nio.file.FileVisitor and SimpleFileVisitor
+
+
+==================Compound patterns================
+A compound pattern combines two or more patterns into a solution that solves a recurring or general problem.
+e.g. MVC and model 2.
+======================Object oriented design principles=================
+1. Encapsulate what varies
+2. Favor composition over inheritance
+3. Program to interface, not implementation
+4. Strive for loosely coupled designs between objects that interact: e.g. Observer pattern
+5. Classes should be open for extension but closed for modification. eg. Observer pattern
+6. Depend upon abstraction, dont depend upon concrete classes. e.g. Factory and Abstract factory patterns
+7. Only talk to your friends(technique to maintain loose coupling) e.g. Facade pattern
+8. Dont call us we will call you. eg. Template pattern
+9. A class should have only one reason to change.
+==============================================================================================================================
